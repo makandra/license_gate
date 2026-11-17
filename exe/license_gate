@@ -1,0 +1,5 @@
+#!/usr/bin/env ruby
+
+require 'license_gate'
+
+exit LicenseGate::CLI.new(ARGV).run

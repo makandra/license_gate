@@ -1,0 +1,7 @@
+inherit_gem:
+  makandra-rubocop:
+    - config/default.yml
+    - config/ext/rspec.yml
+
+AllCops:
+  SuggestExtensions: false

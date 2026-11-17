@@ -1,0 +1,7 @@
+{
+  "name": "sub",
+  "private": true,
+  "dependencies": {
+    "sub-package": "file:../../vendor/sub-package"
+  }
+}

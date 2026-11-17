@@ -1,0 +1,9 @@
+#!/bin/sh
+# Stands in for pnpm: records its arguments and prints what the fixture project in the working directory prepared.
+printf '%s\n' "$*" > fake-pnpm-arguments
+if [ -f fake-pnpm-stderr ]; then
+  cat fake-pnpm-stdout
+  cat fake-pnpm-stderr >&2
+  exit 1
+fi
+cat fake-pnpm-output.json

@@ -1,0 +1,73 @@
+name: Tests
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  rspec:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby:
+          - '3.3'
+          - '3.4'
+          - '4.0'
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+      - run: bundle exec rspec
+
+  # Runs the whole suite, so spec/integration also checks against a real pnpm.
+  pnpm:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        pnpm:
+          - '9'
+          - '10'
+          - '11'
+          - '12'
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ matrix.pnpm }}
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '4.0'
+          bundler-cache: true
+      - run: bundle exec rspec
+        env:
+          REAL_PNPM: required
+
+  # Runs the executable through Bundler on this repository, as a smoke test.
+  license_gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '4.0'
+          bundler-cache: true
+      - run: bundle exec license_gate --report
+
+  rubocop:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '4.0'
+          bundler-cache: true
+      - run: bundle exec rubocop

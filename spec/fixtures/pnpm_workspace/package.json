@@ -1,0 +1,14 @@
+{
+  "name": "root",
+  "private": true,
+  "dependencies": {
+    "mit-package": "file:./vendor/mit-package",
+    "unlicensed-package": "file:./vendor/unlicensed-package"
+  },
+  "devDependencies": {
+    "dev-package": "file:./vendor/dev-package"
+  },
+  "optionalDependencies": {
+    "optional-package": "file:./vendor/optional-package"
+  }
+}
