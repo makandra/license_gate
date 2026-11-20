@@ -1,9 +1,12 @@
 require 'simplecov'
 
-SimpleCov.start do
-  enable_coverage :branch
-  add_filter '/spec/'
-  minimum_coverage line: 100, branch: 100
+# CI runs the integration specs on their own, which would fall below the minimum.
+unless ENV['COVERAGE'] == 'false'
+  SimpleCov.start do
+    enable_coverage :branch
+    add_filter '/spec/'
+    minimum_coverage line: 100, branch: 100
+  end
 end
 
 require 'license_gate'
@@ -12,7 +15,7 @@ require 'tmpdir'
 
 Dir[File.expand_path('support/**/*.rb', __dir__)].each { |file| require file }
 
-# Specs run the fake pnpm from spec/fixtures/bin, except for spec/integration, which needs a real one.
+# Specs run the fake pnpm and yarn from spec/fixtures/bin, except for spec/integration, which needs real ones.
 REAL_PATH = ENV.fetch('PATH')
 ENV['PATH'] = [File.expand_path('fixtures/bin', __dir__), REAL_PATH].join(File::PATH_SEPARATOR)
 

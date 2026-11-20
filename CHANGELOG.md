@@ -1,3 +1,7 @@
+## Unreleased
+
+- Checks the licenses of npm packages installed through Yarn; Yarn 2 and later need the plugin yarn-plugin-licenses.
+
 ## [0.1.0] - 2026-11-18
 
 - Checks the licenses of Bundler gems and pnpm packages.

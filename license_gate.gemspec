@@ -6,7 +6,7 @@ Gem::Specification.new do |spec|
   spec.authors = ['Arne Hartherz']
   spec.email = ['arne.hartherz@makandra.de']
 
-  spec.summary = 'Checks licenses of your Bundler and pnpm dependencies against an allowlist'
+  spec.summary = 'Checks licenses of your Bundler, pnpm and Yarn dependencies against an allowlist'
   spec.description = 'Fails when a gem or npm package uses a license your project has not permitted. Further licenses can be allowed for specific packages only.'
   spec.homepage = 'https://github.com/makandra/license_gate'
   spec.license = 'MIT'

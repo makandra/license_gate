@@ -25,9 +25,10 @@ jobs:
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
-      - run: bundle exec rspec
+      # Integration specs run in jobs of their own.
+      - run: bundle exec rspec --exclude-pattern 'spec/integration/**/*_spec.rb'
 
-  # Runs the whole suite, so spec/integration also checks against a real pnpm.
+  # Checks against a real pnpm; the rspec job runs all other specs and checks coverage.
   pnpm:
     runs-on: ubuntu-latest
     strategy:
@@ -47,9 +48,47 @@ jobs:
         with:
           ruby-version: '4.0'
           bundler-cache: true
-      - run: bundle exec rspec
+      - run: bundle exec rspec spec/integration/real_pnpm_spec.rb
         env:
+          COVERAGE: 'false'
           REAL_PNPM: required
+
+  # Checks against a real Yarn; the rspec job runs all other specs and checks coverage.
+  yarn:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - yarn: '1'
+            spec: legacy
+          # Yarn 2 does not run on Node 23 and later.
+          - yarn: '2'
+            spec: berry
+            node: '22'
+          - yarn: '3'
+            spec: berry
+          - yarn: '4'
+            spec: berry
+    env:
+      MISE_YARN_VERSION: ${{ matrix.yarn }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v7
+        if: matrix.node
+        with:
+          node-version: ${{ matrix.node }}
+      - uses: jdx/mise-action@v5
+        with:
+          install_args: yarn
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '4.0'
+          bundler-cache: true
+      - run: bundle exec rspec spec/integration/real_yarn_${{ matrix.spec }}_spec.rb
+        env:
+          COVERAGE: 'false'
+          REAL_YARN: required
 
   # Runs the executable through Bundler on this repository, as a smoke test.
   license_gate:

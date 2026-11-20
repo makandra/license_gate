@@ -18,7 +18,7 @@ RSpec.describe LicenseGate::Sources::Pnpm do
 
     it 'returns no packages when an older pnpm reports that it found none' do
       fixture_project.add_npm_packages({})
-      fixture_project.write('fake-pnpm-output.json', "No licenses in packages found\n")
+      fixture_project.write('fake-output', "No licenses in packages found\n")
 
       expect(described_class.new(fixture_project.root, ignored_groups: []).packages).to eq([])
     end
@@ -26,7 +26,7 @@ RSpec.describe LicenseGate::Sources::Pnpm do
     it 'fails with a hint on the pnpm version when entries lack versions' do
       fixture_project.add_npm_packages({})
       entry = { 'name' => 'left-pad', 'version' => '1.3.0', 'license' => 'MIT' }
-      fixture_project.write('fake-pnpm-output.json', JSON.generate('MIT' => [entry]))
+      fixture_project.write('fake-output', JSON.generate('MIT' => [entry]))
 
       expect { described_class.new(fixture_project.root, ignored_groups: []).packages }
         .to raise_error(LicenseGate::PnpmError, 'unexpected output from `pnpm licenses list`; pnpm 9 or later is required')
@@ -37,7 +37,7 @@ RSpec.describe LicenseGate::Sources::Pnpm do
 
       described_class.new(fixture_project.root, ignored_groups: []).packages
 
-      expect(fixture_project.pnpm_arguments).to eq(%w[licenses list --json --recursive])
+      expect(fixture_project.package_manager_arguments).to eq(%w[licenses list --json --recursive])
     end
 
     it 'leaves out ignored groups' do
@@ -45,12 +45,12 @@ RSpec.describe LicenseGate::Sources::Pnpm do
 
       described_class.new(fixture_project.root, ignored_groups: %w[devDependencies optionalDependencies]).packages
 
-      expect(fixture_project.pnpm_arguments).to eq(%w[licenses list --json --recursive --prod --no-optional])
+      expect(fixture_project.package_manager_arguments).to eq(%w[licenses list --json --recursive --prod --no-optional])
     end
 
     it "fails with pnpm's error output" do
       fixture_project.add_npm_packages({})
-      fixture_project.fail_pnpm(stderr: "ERR_PNPM_NO_LOCKFILE\n")
+      fixture_project.fail_package_manager(stderr: "ERR_PNPM_NO_LOCKFILE\n")
 
       expect { described_class.new(fixture_project.root, ignored_groups: []).packages }
         .to raise_error(LicenseGate::PnpmError, "`pnpm licenses list --json --recursive` failed:\nERR_PNPM_NO_LOCKFILE\n")
@@ -58,7 +58,7 @@ RSpec.describe LicenseGate::Sources::Pnpm do
 
     it 'fails with the output of a pnpm that reports errors on stdout' do
       fixture_project.add_npm_packages({})
-      fixture_project.fail_pnpm(stdout: '{"error": {"code": "ERR_PNPM_MISSING_PACKAGE_INDEX_FILE"}}')
+      fixture_project.fail_package_manager(stdout: '{"error": {"code": "ERR_PNPM_MISSING_PACKAGE_INDEX_FILE"}}')
 
       expect { described_class.new(fixture_project.root, ignored_groups: []).packages }.to raise_error(
         LicenseGate::PnpmError,
@@ -69,7 +69,7 @@ RSpec.describe LicenseGate::Sources::Pnpm do
     it 'reads non-ASCII package metadata under a non-UTF-8 locale' do
       fixture_project.add_npm_packages({})
       entry = { 'name' => 'cross-spawn', 'versions' => ['7.0.6'], 'license' => 'MIT', 'author' => 'André Cruz' }
-      fixture_project.write('fake-pnpm-output.json', JSON.generate('MIT' => [entry]))
+      fixture_project.write('fake-output', JSON.generate('MIT' => [entry]))
       external_encoding_was = Encoding.default_external
       Encoding.default_external = Encoding::US_ASCII
 
