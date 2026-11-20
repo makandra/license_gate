@@ -13,7 +13,10 @@ RSpec.describe 'license_gate with a real pnpm' do
   before do
     pnpm_version = real_pnpm_version
     if pnpm_version && pnpm_version >= Gem::Version.new('9')
-      FileUtils.cp_r("#{File.expand_path('../fixtures/pnpm_workspace', __dir__)}/.", project)
+      # Packages shared with other package managers, then pnpm's project configuration.
+      fixtures = File.expand_path('../fixtures', __dir__)
+      FileUtils.cp_r("#{fixtures}/npm_workspace/.", project)
+      FileUtils.cp_r("#{fixtures}/pnpm_workspace/.", project)
       output, status = run('pnpm', 'install', '--offline', '--no-frozen-lockfile')
       raise "pnpm install failed:\n#{output}" unless status.success?
     elsif ENV['REAL_PNPM'] == 'required'
