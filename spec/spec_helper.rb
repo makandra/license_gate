@@ -1,9 +1,12 @@
 require 'simplecov'
 
-SimpleCov.start do
-  enable_coverage :branch
-  add_filter '/spec/'
-  minimum_coverage line: 100, branch: 100
+# CI runs the integration specs on their own, which would fall below the minimum.
+unless ENV['COVERAGE'] == 'false'
+  SimpleCov.start do
+    enable_coverage :branch
+    add_filter '/spec/'
+    minimum_coverage line: 100, branch: 100
+  end
 end
 
 require 'license_gate'
