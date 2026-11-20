@@ -1,7 +1,8 @@
 module LicenseGate
   module Sources
 
-    # npm packages as reported by `yarn licenses list`, which the plugin yarn-plugin-licenses adds to Yarn 2 and later.
+    # npm packages as reported by `yarn licenses list`.
+    # Yarn 1 has the command built in, Yarn 2 and later get it from the plugin yarn-plugin-licenses.
     class Yarn
 
       LOCKFILE = 'yarn.lock'.freeze
@@ -11,7 +12,7 @@ module LicenseGate
       # Yarn 2 cannot run the command of later plugin releases.
       YARN_2_PLUGIN_URL = 'https://raw.githubusercontent.com/mhassan1/yarn-plugin-licenses/v0.6.0/bundles/@yarnpkg/plugin-licenses.js'.freeze
 
-      # The plugin's option leaving out each group.
+      # The option leaving out each group.
       OPTIONS = {
         'devDependencies' => '--production',
       }.freeze
@@ -22,31 +23,15 @@ module LicenseGate
       end
 
       def packages
-        versions = lockfile_versions
-        # A package appears under several locators, e.g. as a `file:` dependency of two workspaces.
-        packages = list_licenses.each_line.flat_map do |line|
-          entry = JSON.parse(line)
-          # Workspaces are the project itself, not its dependencies.
-          locators = entry['children'].keys.grep_v(/@workspace:/)
-          locators.map do |locator|
-            Package.new(
-              ecosystem: Ecosystem::NPM,
-              name: locator[/\A@?[^@]+/],
-              # Locators of packages with peer dependencies wrap the locator the lockfile lists, e.g. `debug@virtual:<hash>#npm:4.4.0`.
-              version: versions.fetch(locator.sub(/@virtual:[^#]+#/, '@')),
-              licenses: [entry['value']],
-            )
-          end
-        end
-        packages.uniq
+        parser = legacy? ? Legacy : Berry
+        parser.new(@root).packages(list_licenses)
       end
 
       private
 
-      # Locators only carry a version for some protocols (not e.g. for `file:`), so versions come from the lockfile.
-      def lockfile_versions
-        entries = YAML.safe_load_file(@root.join(LOCKFILE)).except('__metadata')
-        entries.values.to_h { |entry| [entry['resolution'], entry['version']] }
+      # Yarn 1 writes this line to its lockfiles, which have a format of their own.
+      def legacy?
+        @root.join(LOCKFILE).read.include?('# yarn lockfile v1')
       end
 
       def list_licenses

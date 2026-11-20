@@ -68,7 +68,7 @@ RSpec.describe LicenseGate::Check do
         ignored_groups:
           npm: [devDependencies]
       YAML
-      fixture_project.add_yarn_packages({ 'GPL-3.0-only' => ['copyleft@npm:2.0.0'] }, 'copyleft@npm:2.0.0' => '2.0.0')
+      fixture_project.add_yarn_berry_packages({ 'GPL-3.0-only' => ['copyleft@npm:2.0.0'] }, 'copyleft@npm:2.0.0' => '2.0.0')
 
       result = check
 

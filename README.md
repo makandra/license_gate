@@ -158,8 +158,12 @@ Requires pnpm 9 or later; tested with pnpm 9, 10, 11 and 12.
 
 ### Yarn
 
-When your project root has a `yarn.lock`, licenses of all workspaces are checked through `yarn licenses list` of the plugin [yarn-plugin-licenses](https://github.com/mhassan1/yarn-plugin-licenses).
-Add the plugin to your project:
+When your project root has a `yarn.lock`, licenses of all workspaces are checked through `yarn licenses list`.
+Packages must be installed.
+Yarn cannot leave out `optionalDependencies`, so `ignored_groups.npm` may only list `devDependencies`.
+
+Yarn 1 (Classic) has this command built in.
+Yarn 2 and later need the plugin [yarn-plugin-licenses](https://github.com/mhassan1/yarn-plugin-licenses), which you add to your project:
 
 ```
 # Yarn 3 or later
@@ -169,14 +173,11 @@ yarn plugin import https://raw.githubusercontent.com/mhassan1/yarn-plugin-licens
 yarn plugin import https://raw.githubusercontent.com/mhassan1/yarn-plugin-licenses/v0.6.0/bundles/@yarnpkg/plugin-licenses.js
 ```
 
-Packages must be installed.
-Yarn cannot leave out `optionalDependencies`, so `ignored_groups.npm` may only list `devDependencies`.
-
-Tested with Yarn 2, 3 and 4.
+Tested with Yarn 1, 2, 3 and 4.
 
 ### Currently unsupported
 
-License Gate does not yet support plain npm, Yarn 1 (Classic), or other package managers.
+License Gate does not yet support plain npm or other package managers.
 Contributions adding them are welcome.
 
 When your `package.json` declares dependencies, but there is neither a `pnpm-lock.yaml` nor a `yarn.lock`, it fails with an error.
@@ -207,12 +208,15 @@ With [mise](https://mise.jdx.dev/), `mise.toml` provides pnpm 12 and Yarn 4.
 To test another version, select it through mise, and run the matching spec on its own:
 
 ```
+MISE_YARN_VERSION=1 mise install yarn
+MISE_YARN_VERSION=1 COVERAGE=false bundle exec rspec spec/integration/real_yarn_legacy_spec.rb
+
 MISE_YARN_VERSION=3 mise install yarn
-MISE_YARN_VERSION=3 COVERAGE=false bundle exec rspec spec/integration/real_yarn_spec.rb
+MISE_YARN_VERSION=3 COVERAGE=false bundle exec rspec spec/integration/real_yarn_berry_spec.rb
 ```
 
-- `real_yarn_spec.rb` covers Yarn 2 and later, and `real_pnpm_spec.rb` pnpm (selected through `MISE_PNPM_VERSION`).
-- The Yarn spec imports the plugin yarn-plugin-licenses from GitHub.
+- `real_yarn_legacy_spec.rb` covers Yarn 1, `real_yarn_berry_spec.rb` Yarn 2 and later, and `real_pnpm_spec.rb` pnpm (selected through `MISE_PNPM_VERSION`).
+- The Yarn 2+ spec imports the plugin yarn-plugin-licenses from GitHub.
 - Yarn 2 does not run on Node 23 and later; select an older Node, e.g. through `MISE_NODE_VERSION=22`.
 - `COVERAGE=false` is needed for single specs, as they do not reach the coverage minimum on their own.
 - With `REAL_YARN=required` or `REAL_PNPM=required` (as in CI), specs fail instead of being skipped.
