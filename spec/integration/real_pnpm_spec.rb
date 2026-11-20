@@ -2,7 +2,12 @@
 # Skipped without pnpm 9 or later on PATH, unless REAL_PNPM=required (as in CI).
 RSpec.describe 'license_gate with a real pnpm' do
 
-  let(:project) { Pathname(Dir.mktmpdir('license_gate_pnpm')) }
+  # Inside this repository, so that a mise shim picks the pnpm of its mise.toml.
+  let(:project) do
+    tmp = Pathname(File.expand_path('../../tmp', __dir__))
+    tmp.mkpath
+    Pathname(Dir.mktmpdir('license_gate_pnpm', tmp))
+  end
   let(:command) { [RbConfig.ruby, '-I', File.expand_path('../../lib', __dir__), File.expand_path('../../exe/license_gate', __dir__)] }
 
   before do
