@@ -65,7 +65,7 @@ module LicenseGate
     end
 
     def report(result, display_path, all_packages:)
-      @out.puts "npm packages: not checked (no #{Sources::Pnpm::LOCKFILE})" unless result.npm_checked
+      @out.puts "npm packages: not checked (no #{Sources::Pnpm::LOCKFILE} or #{Sources::Yarn::LOCKFILE})" unless result.npm_checked
       listed_packages = all_packages ? result.packages : result.violations
       if listed_packages.any?
         listed_packages.each { |package| @out.puts package_line(package, result) }

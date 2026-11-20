@@ -1,4 +1,4 @@
-# A throwaway project with a Gemfile of local path gems, a configuration file and output for the fake pnpm.
+# A throwaway project with a Gemfile of local path gems, a configuration file and output for the fake pnpm and yarn.
 class FixtureProject
 
   attr_reader :root
@@ -36,12 +36,22 @@ class FixtureProject
     end
     write('pnpm-lock.yaml', '')
     write('node_modules/.modules.yaml', '')
-    write('fake-pnpm-output.json', JSON.generate(pnpm_output))
+    write('fake-output', JSON.generate(pnpm_output))
   end
 
-  def fail_pnpm(stdout: '', stderr: '')
-    write('fake-pnpm-stdout', stdout)
-    write('fake-pnpm-stderr', stderr)
+  # Takes package locators by license, e.g. `{ 'MIT' => ['left-pad@npm:1.3.0'] }`, and the versions the lockfile lists for locators.
+  def add_yarn_packages(licenses, versions = {})
+    lockfile = versions.to_h { |locator, version| [locator, { 'version' => version, 'resolution' => locator }] }
+    yarn_output = licenses.map do |license, locators|
+      "#{JSON.generate('value' => license, 'children' => locators.to_h { |locator| [locator, {}] })}\n"
+    end
+    write('yarn.lock', YAML.dump({ '__metadata' => { 'version' => 8 } }.merge(lockfile)))
+    write('fake-output', yarn_output.join)
+  end
+
+  def fail_package_manager(stdout: '', stderr: '')
+    write('fake-stdout', stdout)
+    write('fake-stderr', stderr)
   end
 
   def gemfile
@@ -52,8 +62,8 @@ class FixtureProject
     root.join('Gemfile.lock')
   end
 
-  def pnpm_arguments
-    root.join('fake-pnpm-arguments').read.split
+  def package_manager_arguments
+    root.join('fake-arguments').read.split
   end
 
   def write(path, content)

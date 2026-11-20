@@ -61,7 +61,22 @@ RSpec.describe LicenseGate::Check do
       expect(check.violations.map(&:name)).to eq(['other-old-gem'])
     end
 
-    it 'checks npm packages only with a pnpm-lock.yaml' do
+    it 'checks npm packages through Yarn with a yarn.lock' do
+      fixture_project.add_configuration(<<~YAML)
+        permitted_licenses:
+          MIT:
+        ignored_groups:
+          npm: [devDependencies]
+      YAML
+      fixture_project.add_yarn_packages({ 'GPL-3.0-only' => ['copyleft@npm:2.0.0'] }, 'copyleft@npm:2.0.0' => '2.0.0')
+
+      result = check
+
+      expect(result.violations.map(&:to_s)).to eq(['npm copyleft 2.0.0'])
+      expect(fixture_project.package_manager_arguments).to eq(%w[licenses list --json --recursive --production])
+    end
+
+    it 'checks npm packages only with a pnpm-lock.yaml or yarn.lock' do
       fixture_project.add_configuration(<<~YAML)
         permitted_licenses:
           MIT:
@@ -84,7 +99,7 @@ RSpec.describe LicenseGate::Check do
       fixture_project.add_npm_packages({})
 
       expect(check.packages.map(&:name)).not_to include('debug-helper')
-      expect(fixture_project.pnpm_arguments).to eq(%w[licenses list --json --recursive --prod])
+      expect(fixture_project.package_manager_arguments).to eq(%w[licenses list --json --recursive --prod])
     end
 
     it 'skips npm packages for a package.json without dependencies' do
@@ -94,14 +109,14 @@ RSpec.describe LicenseGate::Check do
       expect(check.npm_checked).to be(false)
     end
 
-    it 'fails when package.json declares dependencies without a pnpm-lock.yaml, e.g. for another package manager' do
+    it 'fails when package.json declares dependencies without a pnpm-lock.yaml or yarn.lock, e.g. for another package manager' do
       fixture_project.add_configuration("permitted_licenses:\n  MIT:\n")
       fixture_project.write('package.json', '{"devDependencies": {"eslint": "^10.0.0"}}')
-      fixture_project.write('yarn.lock', '')
+      fixture_project.write('package-lock.json', '{}')
 
       expect { check }.to raise_error(
         LicenseGate::UnsupportedPackageManagerError,
-        'package.json declares dependencies, but there is no pnpm-lock.yaml; only pnpm is supported',
+        'package.json declares dependencies, but there is no pnpm-lock.yaml or yarn.lock; only pnpm and Yarn are supported',
       )
     end
   end

@@ -64,7 +64,7 @@ RSpec.describe LicenseGate::CLI do
 
       expect(run_cli('--report')).to eq(0)
       expect(out.string).to eq(<<~TEXT)
-        npm packages: not checked (no pnpm-lock.yaml)
+        npm packages: not checked (no pnpm-lock.yaml or yarn.lock)
         ✓ gem alpha 1.0.0: MIT
         ✓ gem bundler #{Bundler::VERSION}: MIT
 
@@ -78,7 +78,7 @@ RSpec.describe LicenseGate::CLI do
 
       expect(run_cli).to eq(0)
       expect(out.string).to eq(<<~TEXT)
-        npm packages: not checked (no pnpm-lock.yaml)
+        npm packages: not checked (no pnpm-lock.yaml or yarn.lock)
         All 2 packages use permitted licenses (2 gems, 0 npm packages).
       TEXT
     end

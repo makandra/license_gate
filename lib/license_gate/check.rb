@@ -43,13 +43,20 @@ module LicenseGate
 
       @npm_source = if pnpm_project?
         Sources::Pnpm.new(@root, ignored_groups: @configuration.ignored_npm_groups)
+      elsif yarn_project?
+        Sources::Yarn.new(@root, ignored_groups: @configuration.ignored_npm_groups)
       elsif npm_dependencies?
-        raise UnsupportedPackageManagerError, "package.json declares dependencies, but there is no #{Sources::Pnpm::LOCKFILE}; only pnpm is supported"
+        raise UnsupportedPackageManagerError,
+          "package.json declares dependencies, but there is no #{Sources::Pnpm::LOCKFILE} or #{Sources::Yarn::LOCKFILE}; only pnpm and Yarn are supported"
       end
     end
 
     def pnpm_project?
       @root.join(Sources::Pnpm::LOCKFILE).exist?
+    end
+
+    def yarn_project?
+      @root.join(Sources::Yarn::LOCKFILE).exist?
     end
 
     def npm_dependencies?

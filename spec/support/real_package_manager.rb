@@ -1,5 +1,5 @@
 # Runs the executable against a real package manager, which all other specs replace with spec/fixtures/bin.
-# Skipped without a matching version on PATH, unless REAL_PNPM=required (as in CI).
+# Skipped without a matching version on PATH, unless REAL_PNPM or REAL_YARN=required (as in CI).
 # Specs including this define `install`, which installs the packages of the copied fixture.
 RSpec.shared_context 'with a real package manager' do |executable, major_versions, description|
 
