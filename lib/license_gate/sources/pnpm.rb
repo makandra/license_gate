@@ -13,6 +13,10 @@ module LicenseGate
         'optionalDependencies' => '--no-optional',
       }.freeze
 
+      def self.responsible_for?(root)
+        root.join(LOCKFILE).exist?
+      end
+
       def initialize(root, ignored_groups:)
         @root = root
         @ignored_groups = ignored_groups

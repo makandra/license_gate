@@ -101,7 +101,7 @@ RSpec.describe LicenseGate::Check do
 
       expect { check }.to raise_error(
         LicenseGate::UnsupportedPackageManagerError,
-        'package.json declares dependencies, but there is no pnpm-lock.yaml; only pnpm is supported',
+        'package.json declares dependencies, but there is no pnpm-lock.yaml; other package managers are not supported',
       )
     end
   end

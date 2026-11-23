@@ -1,5 +1,17 @@
 RSpec.describe LicenseGate::Sources::Pnpm do
 
+  describe '.responsible_for?' do
+    it 'is true with a pnpm-lock.yaml' do
+      fixture_project.write('pnpm-lock.yaml', '')
+
+      expect(described_class.responsible_for?(fixture_project.root)).to be(true)
+    end
+
+    it 'is false without a pnpm-lock.yaml' do
+      expect(described_class.responsible_for?(fixture_project.root)).to be(false)
+    end
+  end
+
   describe '#packages' do
     it 'returns one package per name and version' do
       fixture_project.add_npm_packages(

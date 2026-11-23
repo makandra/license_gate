@@ -5,6 +5,9 @@ module LicenseGate
 
     DEPENDENCY_KEYS = %w[dependencies devDependencies optionalDependencies].freeze
 
+    NPM_SOURCES = [Sources::Pnpm].freeze
+    NPM_LOCKFILES = NPM_SOURCES.map { |source| source::LOCKFILE }.uniq.freeze
+
     def initialize(configuration, gemfile:, lockfile:)
       @configuration = configuration
       @gemfile = gemfile
@@ -41,15 +44,13 @@ module LicenseGate
     def npm_source
       return @npm_source if defined?(@npm_source)
 
-      @npm_source = if pnpm_project?
-        Sources::Pnpm.new(@root, ignored_groups: @configuration.ignored_npm_groups)
+      source = NPM_SOURCES.find { |npm_source| npm_source.responsible_for?(@root) }
+      @npm_source = if source
+        source.new(@root, ignored_groups: @configuration.ignored_npm_groups)
       elsif npm_dependencies?
-        raise UnsupportedPackageManagerError, "package.json declares dependencies, but there is no #{Sources::Pnpm::LOCKFILE}; only pnpm is supported"
+        raise UnsupportedPackageManagerError,
+          "package.json declares dependencies, but there is no #{NPM_LOCKFILES.join(' or ')}; other package managers are not supported"
       end
-    end
-
-    def pnpm_project?
-      @root.join(Sources::Pnpm::LOCKFILE).exist?
     end
 
     def npm_dependencies?
