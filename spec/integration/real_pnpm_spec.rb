@@ -8,7 +8,9 @@ RSpec.describe 'license_gate with a real pnpm' do
   before do
     pnpm_version = real_pnpm_version
     if pnpm_version && pnpm_version >= Gem::Version.new('9')
-      FileUtils.cp_r("#{File.expand_path('../fixtures/pnpm_workspace', __dir__)}/.", project)
+      # Copies each entry on its own, so that links to spec/fixtures/npm/shared are followed.
+      # Links further down would be copied as links, so they may only sit at the top level of a fixture.
+      FileUtils.cp_r(Pathname(File.expand_path('../fixtures/npm/pnpm', __dir__)).children, project)
       output, status = run('pnpm', 'install', '--offline', '--no-frozen-lockfile')
       raise "pnpm install failed:\n#{output}" unless status.success?
     elsif ENV['REAL_PNPM'] == 'required'
