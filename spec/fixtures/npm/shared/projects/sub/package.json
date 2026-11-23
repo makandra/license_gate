@@ -1,5 +1,6 @@
 {
   "name": "sub",
+  "version": "1.0.0",
   "private": true,
   "dependencies": {
     "sub-package": "file:../../vendor/sub-package"

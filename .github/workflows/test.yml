@@ -58,6 +58,7 @@ jobs:
       fail-fast: false
       matrix:
         yarn:
+          - '1'
           - '4'
     env:
       MISE_YARN_VERSION: ${{ matrix.yarn }}

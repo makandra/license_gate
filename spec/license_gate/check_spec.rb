@@ -102,6 +102,13 @@ RSpec.describe LicenseGate::Check do
       expect(fixture_project.package_manager_arguments).to eq(%w[licenses list --json --recursive --production])
     end
 
+    it 'checks npm packages through Yarn Classic with its yarn.lock' do
+      fixture_project.add_configuration("permitted_licenses:\n  MIT:\n")
+      fixture_project.add_yarn_classic_packages('GPL-3.0-only' => { 'copyleft' => ['2.0.0'] })
+
+      expect(check.violations.map(&:to_s)).to eq(['npm copyleft 2.0.0'])
+    end
+
     it 'fails for lockfiles of several package managers' do
       fixture_project.add_configuration("permitted_licenses:\n  MIT:\n")
       fixture_project.add_pnpm_packages({})

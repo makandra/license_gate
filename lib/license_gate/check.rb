@@ -5,7 +5,7 @@ module LicenseGate
 
     DEPENDENCY_KEYS = %w[dependencies devDependencies optionalDependencies].freeze
 
-    NPM_SOURCES = [Sources::Pnpm, Sources::YarnBerry].freeze
+    NPM_SOURCES = [Sources::Pnpm, Sources::YarnBerry, Sources::YarnClassic].freeze
     NPM_LOCKFILES = NPM_SOURCES.map { |source| source::LOCKFILE }.uniq.freeze
 
     def initialize(configuration, gemfile:, lockfile:)

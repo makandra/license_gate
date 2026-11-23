@@ -158,9 +158,11 @@ Requires pnpm 9 or later; tested with pnpm 9, 10, 11 and 12.
 
 ### Yarn
 
-When your project root has a `yarn.lock` of Yarn 4, licenses of all workspaces are checked through `yarn licenses list`.
-Packages must be installed.
+When your project root has a `yarn.lock`, licenses of all workspaces are checked through `yarn licenses list`.
+With Yarn 4, packages must be installed, and installed again after every change to `yarn.lock`:
+the check leaves out packages that `yarn.lock` lists but that are not installed.
 
+Yarn Classic (1) has this command built in.
 Yarn 4 needs the plugin [yarn-plugin-licenses](https://github.com/mhassan1/yarn-plugin-licenses) for this command, which you add to your project:
 
 ```
@@ -169,7 +171,7 @@ yarn plugin import https://raw.githubusercontent.com/mhassan1/yarn-plugin-licens
 
 Yarn cannot leave out `optionalDependencies`, so `ignored_groups.npm` may only list `devDependencies`.
 
-Tested with Yarn 4, with `nodeLinker: node-modules` and with Plug'n'Play.
+Tested with Yarn Classic (1), and with Yarn 4 using `nodeLinker: node-modules` and Plug'n'Play.
 
 ### Currently unsupported
 
@@ -207,6 +209,7 @@ To test one version like a CI job does, set its major version and run only the i
 ```
 TEST_PNPM=12 bundle exec rspec spec/integration
 TEST_YARN=4 bundle exec rspec spec/integration
+TEST_YARN=1 MISE_YARN_VERSION=1 bundle exec rspec spec/integration
 ```
 
 The spec for that version then fails instead of being skipped, e.g. when another version is on your `PATH`.
