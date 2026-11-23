@@ -14,7 +14,7 @@ RSpec.describe LicenseGate::Check do
       fixture_project.add_gem('zeta', licenses: ['GPL-3.0-only'])
       fixture_project.add_gem('alpha', licenses: ['AGPL-3.0-only'])
       fixture_project.add_gem('beta', licenses: ['MIT'])
-      fixture_project.add_npm_packages('ISC' => { 'glob' => ['10.0.0'] }, 'MIT' => { 'left-pad' => ['1.3.0'] })
+      fixture_project.add_pnpm_packages('ISC' => { 'glob' => ['10.0.0'] }, 'MIT' => { 'left-pad' => ['1.3.0'] })
 
       result = check
 
@@ -81,10 +81,10 @@ RSpec.describe LicenseGate::Check do
           npm: [devDependencies]
       YAML
       fixture_project.add_gem('debug-helper', licenses: ['GPL-3.0-only'], group: :development)
-      fixture_project.add_npm_packages({})
+      fixture_project.add_pnpm_packages({})
 
       expect(check.packages.map(&:name)).not_to include('debug-helper')
-      expect(fixture_project.pnpm_arguments).to eq(%w[licenses list --json --recursive --prod])
+      expect(fixture_project.package_manager_arguments).to eq(%w[licenses list --json --recursive --prod])
     end
 
     it 'skips npm packages for a package.json without dependencies' do

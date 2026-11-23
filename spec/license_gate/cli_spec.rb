@@ -11,7 +11,7 @@ RSpec.describe LicenseGate::CLI do
     it 'reports success and returns 0 when all licenses are permitted' do
       fixture_project.add_configuration("permitted_licenses:\n  MIT:\n")
       fixture_project.add_gem('alpha', licenses: ['MIT'])
-      fixture_project.add_npm_packages('MIT' => { 'left-pad' => ['1.3.0'], 'tslib' => ['2.8.1', '1.14.1'] })
+      fixture_project.add_pnpm_packages('MIT' => { 'left-pad' => ['1.3.0'], 'tslib' => ['2.8.1', '1.14.1'] })
 
       expect(run_cli).to eq(0)
       expect(out.string).to eq("All 5 packages use permitted licenses (2 gems, 3 npm packages).\n")
@@ -22,7 +22,7 @@ RSpec.describe LicenseGate::CLI do
       fixture_project.add_gem('alpha', licenses: ['MIT'])
       fixture_project.add_gem('beta', licenses: ['GPL-2.0-only', 'GPL-3.0-only'])
       fixture_project.add_gem('gamma', licenses: [])
-      fixture_project.add_npm_packages(
+      fixture_project.add_pnpm_packages(
         '(MIT AND Zlib) OR Apache-2.0' => { 'foo' => ['1.2.3'] },
         'Unknown' => { 'bar' => ['0.4.0'] },
       )
@@ -43,7 +43,7 @@ RSpec.describe LicenseGate::CLI do
       fixture_project.add_configuration("permitted_licenses:\n  MIT:\n")
       fixture_project.add_gem('alpha', licenses: ['MIT'])
       fixture_project.add_gem('beta', licenses: ['GPL-3.0-only'])
-      fixture_project.add_npm_packages('MIT' => { 'left-pad' => ['1.3.0'] }, 'Unknown' => { 'bar' => ['0.4.0'] })
+      fixture_project.add_pnpm_packages('MIT' => { 'left-pad' => ['1.3.0'] }, 'Unknown' => { 'bar' => ['0.4.0'] })
 
       expect(run_cli('--report')).to eq(1)
       expect(out.string).to eq(<<~TEXT)

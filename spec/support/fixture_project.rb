@@ -1,4 +1,4 @@
-# A throwaway project with a Gemfile of local path gems, a configuration file and output for the fake pnpm.
+# A throwaway project with a Gemfile of local path gems, a configuration file and output for the fake package manager.
 class FixtureProject
 
   attr_reader :root
@@ -30,18 +30,18 @@ class FixtureProject
   end
 
   # Takes licenses with package names and their versions, e.g. `{ 'MIT' => { 'left-pad' => ['1.3.0'] } }`.
-  def add_npm_packages(licenses)
+  def add_pnpm_packages(licenses)
     pnpm_output = licenses.to_h do |license, packages|
       [license, packages.map { |name, versions| { 'name' => name, 'versions' => versions, 'license' => license } }]
     end
     write('pnpm-lock.yaml', '')
     write('node_modules/.modules.yaml', '')
-    write('fake-pnpm-output.json', JSON.generate(pnpm_output))
+    write('fake-output', JSON.generate(pnpm_output))
   end
 
-  def fail_pnpm(stdout: '', stderr: '')
-    write('fake-pnpm-stdout', stdout)
-    write('fake-pnpm-stderr', stderr)
+  def fail_package_manager(stdout: '', stderr: '')
+    write('fake-stdout', stdout)
+    write('fake-stderr', stderr)
   end
 
   def gemfile
@@ -52,8 +52,8 @@ class FixtureProject
     root.join('Gemfile.lock')
   end
 
-  def pnpm_arguments
-    root.join('fake-pnpm-arguments').read.split
+  def package_manager_arguments
+    root.join('fake-arguments').read.split
   end
 
   def write(path, content)
