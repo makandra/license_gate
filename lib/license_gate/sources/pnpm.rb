@@ -49,18 +49,9 @@ module LicenseGate
 
       def list_licenses
         # Without `--recursive`, pnpm 12 lists only the root project of a workspace.
-        command = ['pnpm', 'licenses', 'list', '--json', '--recursive', *@ignored_groups.map { |group| OPTIONS.fetch(group) }]
-
-        # Binary mode keeps non-ASCII package metadata readable under any locale; JSON is parsed as UTF-8.
-        output, error, status = Open3.capture3(*command, chdir: @root.to_s, binmode: true)
-
-        if status.success?
-          output
-        else
-          # pnpm before 12 reports errors as JSON on stdout.
-          details = error.empty? ? output : error
-          raise PnpmError, "`#{command.join(' ')}` failed:\n#{details}"
-        end
+        Command
+          .new(chdir: @root, error_class: PnpmError)
+          .run('pnpm', 'licenses', 'list', '--json', '--recursive', *@ignored_groups.map { |group| OPTIONS.fetch(group) })
       rescue Errno::ENOENT
         raise PnpmError, "#{LOCKFILE} found, but pnpm is not installed"
       end

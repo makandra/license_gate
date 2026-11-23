@@ -66,6 +66,14 @@ RSpec.describe LicenseGate::Sources::Pnpm do
       )
     end
 
+    it 'fails with both outputs of a pnpm that writes to stdout and stderr' do
+      fixture_project.add_npm_packages({})
+      fixture_project.fail_pnpm(stdout: "Progress\n", stderr: "ERR_PNPM_NO_LOCKFILE\n")
+
+      expect { described_class.new(fixture_project.root, ignored_groups: []).packages }
+        .to raise_error(LicenseGate::PnpmError, "`pnpm licenses list --json --recursive` failed:\nProgress\nERR_PNPM_NO_LOCKFILE\n")
+    end
+
     it 'reads non-ASCII package metadata under a non-UTF-8 locale' do
       fixture_project.add_npm_packages({})
       entry = { 'name' => 'cross-spawn', 'versions' => ['7.0.6'], 'license' => 'MIT', 'author' => 'André Cruz' }
