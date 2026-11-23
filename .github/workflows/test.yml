@@ -27,7 +27,7 @@ jobs:
           bundler-cache: true
       - run: bundle exec rspec
 
-  # Runs the whole suite, so spec/integration also checks against a real pnpm.
+  # Checks against a real pnpm; the rspec job runs all other specs and checks coverage.
   pnpm:
     runs-on: ubuntu-latest
     strategy:
@@ -47,9 +47,9 @@ jobs:
         with:
           ruby-version: '4.0'
           bundler-cache: true
-      - run: bundle exec rspec
+      - run: bundle exec rspec spec/integration
         env:
-          REAL_PNPM: required
+          TEST_PNPM: ${{ matrix.pnpm }}
 
   # Runs the executable through Bundler on this repository, as a smoke test.
   license_gate:

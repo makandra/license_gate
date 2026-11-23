@@ -1,9 +1,14 @@
 require 'simplecov'
 
-SimpleCov.start do
-  enable_coverage :branch
-  add_filter '/spec/'
-  minimum_coverage line: 100, branch: 100
+# Runs for a real package manager (TEST_PNPM, as in CI) check that package manager, not coverage; the rspec job does that.
+integration_run = ENV.key?('TEST_PNPM')
+
+unless integration_run
+  SimpleCov.start do
+    enable_coverage :branch
+    add_filter '/spec/'
+    minimum_coverage line: 100, branch: 100
+  end
 end
 
 require 'license_gate'

@@ -180,6 +180,21 @@ Projects without npm dependencies are checked for gems only.
 Run specs and RuboCop through `bundle exec rake`.
 Specs require 100% line and branch coverage.
 
+### Integration specs
+
+The specs in `spec/integration` run License Gate against a real pnpm.
+Each runs when a version it covers is on your `PATH`, and is skipped otherwise.
+With [mise](https://mise.jdx.dev/), `mise.toml` provides pnpm 12; select another version like `MISE_PNPM_VERSION=10`.
+
+To test one version like CI does, set its major version and run only the integration specs:
+
+```
+TEST_PNPM=12 bundle exec rspec spec/integration
+```
+
+The spec for that version then fails instead of being skipped, e.g. when another version is on your `PATH`.
+Such runs do not check coverage; run the whole suite for that.
+
 
 ## Contributing
 
