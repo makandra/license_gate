@@ -12,6 +12,7 @@ module LicenseGate
   PnpmError = Class.new(Error)
   UnsupportedPackageManagerError = Class.new(Error)
   UsageError = Class.new(Error)
+  YarnError = Class.new(Error)
 
 end
 
@@ -23,5 +24,7 @@ require_relative 'license_gate/configuration'
 require_relative 'license_gate/sources/bundler'
 require_relative 'license_gate/sources/command'
 require_relative 'license_gate/sources/pnpm'
+require_relative 'license_gate/sources/yarn_shared'
+require_relative 'license_gate/sources/yarn_berry'
 require_relative 'license_gate/check'
 require_relative 'license_gate/cli'

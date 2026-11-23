@@ -5,7 +5,7 @@ module LicenseGate
 
     DEPENDENCY_KEYS = %w[dependencies devDependencies optionalDependencies].freeze
 
-    NPM_SOURCES = [Sources::Pnpm].freeze
+    NPM_SOURCES = [Sources::Pnpm, Sources::YarnBerry].freeze
     NPM_LOCKFILES = NPM_SOURCES.map { |source| source::LOCKFILE }.uniq.freeze
 
     def initialize(configuration, gemfile:, lockfile:)
@@ -44,12 +44,17 @@ module LicenseGate
     def npm_source
       return @npm_source if defined?(@npm_source)
 
-      source = NPM_SOURCES.find { |npm_source| npm_source.responsible_for?(@root) }
-      @npm_source = if source
-        source.new(@root, ignored_groups: @configuration.ignored_npm_groups)
+      responsible_sources = NPM_SOURCES.select { |source| source.responsible_for?(@root) }
+      if responsible_sources.size > 1
+        lockfiles = responsible_sources.map { |source| source::LOCKFILE }
+        raise UnsupportedPackageManagerError, "found #{lockfiles.join(' and ')}; delete the lockfile of the package manager you no longer use"
+      end
+
+      @npm_source = if responsible_sources.any?
+        responsible_sources.first.new(@root, ignored_groups: @configuration.ignored_npm_groups)
       elsif npm_dependencies?
         raise UnsupportedPackageManagerError,
-          "package.json declares dependencies, but there is no #{NPM_LOCKFILES.join(' or ')}; other package managers are not supported"
+          "package.json declares dependencies, but there is no #{NPM_LOCKFILES.join(' or ')} of a supported package manager"
       end
     end
 

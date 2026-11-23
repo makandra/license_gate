@@ -51,6 +51,29 @@ jobs:
         env:
           TEST_PNPM: ${{ matrix.pnpm }}
 
+  # Checks against a real Yarn; the rspec job runs all other specs and checks coverage.
+  yarn:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        yarn:
+          - '4'
+    env:
+      MISE_YARN_VERSION: ${{ matrix.yarn }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: jdx/mise-action@v5
+        with:
+          install_args: yarn
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '4.0'
+          bundler-cache: true
+      - run: bundle exec rspec spec/integration
+        env:
+          TEST_YARN: ${{ matrix.yarn }}
+
   # Runs the executable through Bundler on this repository, as a smoke test.
   license_gate:
     runs-on: ubuntu-latest

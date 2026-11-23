@@ -23,8 +23,13 @@ module LicenseGate
       normalize(@string) == normalize(UNKNOWN)
     end
 
+    # Package managers spell a missing license differently, e.g. Yarn as `UNKNOWN`.
     def to_s
-      @string
+      if unknown?
+        UNKNOWN
+      else
+        @string
+      end
     end
 
     private

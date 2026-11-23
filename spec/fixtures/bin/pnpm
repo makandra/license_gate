@@ -1,5 +1,5 @@
 #!/bin/sh
-# Stands in for package managers: records its arguments and prints what the fixture project in the working directory prepared.
+# Stands in for pnpm and yarn (a link to this script): records its arguments and prints what the fixture project in the working directory prepared.
 printf '%s\n' "$*" > fake-arguments
 if [ -f fake-stderr ]; then
   cat fake-stdout

@@ -139,7 +139,7 @@ module LicenseGate
       lists.all? { |list| strings?(list) } && lists.flatten.any?
     end
 
-    # Groups `pnpm licenses list` can leave out.
+    # Groups an npm package manager can leave out: pnpm can leave out all of them, Yarn checks its own.
     def npm_groups
       Sources::Pnpm::OPTIONS.keys
     end

@@ -1,7 +1,7 @@
 # License Gate
 
 `license_gate` checks licenses of your project's dependencies against a configuration in your repository.
-It covers gems of your [Bundler](https://bundler.io/) Gemfile and npm packages installed through [pnpm](https://pnpm.io/).
+It covers gems of your [Bundler](https://bundler.io/) Gemfile and npm packages installed through [pnpm](https://pnpm.io/) or [Yarn](https://yarnpkg.com/).
 
 License Gate works with an allowlist: any license your configuration does not permit fails the check.
 If you accept some licenses only for specific packages, those can be specified as well.
@@ -26,7 +26,7 @@ Run the CLI command from your project:
 bundle exec license_gate
 ```
 
-It always checks your gems, and npm packages when there is a `pnpm-lock.yaml`.
+It always checks your gems, and npm packages when there is a `pnpm-lock.yaml` or `yarn.lock`.
 When packages use licenses that are not permitted, it lists them and fails:
 
 ```
@@ -112,7 +112,7 @@ If a package changes to a license that isn't otherwise permitted, License Gate w
 ### `ignored_groups`
 
 Skips Bundler groups (`bundler`) and npm dependency types (`npm`).
-For npm, `devDependencies` and `optionalDependencies` can be skipped.
+For npm, `devDependencies` and `optionalDependencies` can be skipped (with Yarn, only `devDependencies`).
 
 Both keys default to `[]`, i.e. nothing is skipped.
 
@@ -156,12 +156,28 @@ Requires pnpm 9 or later; tested with pnpm 9, 10, 11 and 12.
 > Older pnpm 11 and 12 releases report every license as `Unknown` with `nodeLinker: hoisted`.
 > This is fixed in pnpm 11.28 and 12.7.
 
+### Yarn
+
+When your project root has a `yarn.lock` of Yarn 4, licenses of all workspaces are checked through `yarn licenses list`.
+Packages must be installed.
+
+Yarn 4 needs the plugin [yarn-plugin-licenses](https://github.com/mhassan1/yarn-plugin-licenses) for this command, which you add to your project:
+
+```
+yarn plugin import https://raw.githubusercontent.com/mhassan1/yarn-plugin-licenses/v0.15.1/bundles/@yarnpkg/plugin-licenses.js
+```
+
+Yarn cannot leave out `optionalDependencies`, so `ignored_groups.npm` may only list `devDependencies`.
+
+Tested with Yarn 4, with `nodeLinker: node-modules` and with Plug'n'Play.
+
 ### Currently unsupported
 
-License Gate does not yet support plain npm, Yarn, or other package managers.
+License Gate does not yet support plain npm or other package managers.
 Contributions adding them are welcome.
 
-When your `package.json` declares dependencies, but there is no `pnpm-lock.yaml`, it fails with an error.
+When your `package.json` declares dependencies, but there is neither a `pnpm-lock.yaml` nor a `yarn.lock` of a supported Yarn, it fails with an error.
+It also fails when there are lockfiles of several package managers, e.g. a `pnpm-lock.yaml` and a `yarn.lock`.
 
 Projects without npm dependencies are checked for gems only.
 
@@ -172,7 +188,7 @@ Projects without npm dependencies are checked for gems only.
 | --- | --- |
 | `0` | All dependencies use permitted licenses. |
 | `1` | Some dependencies use licenses that are not permitted. They are listed in the output. |
-| `2` | The check could not run, e.g. because the configuration is invalid or pnpm failed. |
+| `2` | The check could not run, e.g. because the configuration is invalid or pnpm or Yarn failed. |
 
 
 ## Development
@@ -182,14 +198,15 @@ Specs require 100% line and branch coverage.
 
 ### Integration specs
 
-The specs in `spec/integration` run License Gate against a real pnpm.
+The specs in `spec/integration` run License Gate against a real pnpm and Yarn.
 Each runs when a version it covers is on your `PATH`, and is skipped otherwise.
-With [mise](https://mise.jdx.dev/), `mise.toml` provides pnpm 12; select another version like `MISE_PNPM_VERSION=10`.
+With [mise](https://mise.jdx.dev/), `mise.toml` provides pnpm 12 and Yarn 4; select another version like `MISE_PNPM_VERSION=10`.
 
-To test one version like CI does, set its major version and run only the integration specs:
+To test one version like a CI job does, set its major version and run only the integration specs:
 
 ```
 TEST_PNPM=12 bundle exec rspec spec/integration
+TEST_YARN=4 bundle exec rspec spec/integration
 ```
 
 The spec for that version then fails instead of being skipped, e.g. when another version is on your `PATH`.

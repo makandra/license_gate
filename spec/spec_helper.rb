@@ -1,7 +1,7 @@
 require 'simplecov'
 
-# Runs for a real package manager (TEST_PNPM, as in CI) check that package manager, not coverage; the rspec job does that.
-integration_run = ENV.key?('TEST_PNPM')
+# Runs for a real package manager (TEST_PNPM, TEST_YARN, as in CI) check that package manager, not coverage; the rspec job does that.
+integration_run = ENV.key?('TEST_PNPM') || ENV.key?('TEST_YARN')
 
 unless integration_run
   SimpleCov.start do
@@ -17,7 +17,7 @@ require 'tmpdir'
 
 Dir[File.expand_path('support/**/*.rb', __dir__)].each { |file| require file }
 
-# Specs run the fake pnpm from spec/fixtures/bin, except for spec/integration, which needs a real one.
+# Specs run the fake pnpm and yarn from spec/fixtures/bin, except for spec/integration, which needs real ones.
 REAL_PATH = ENV.fetch('PATH')
 ENV['PATH'] = [File.expand_path('fixtures/bin', __dir__), REAL_PATH].join(File::PATH_SEPARATOR)
 

@@ -90,6 +90,10 @@ RSpec.describe LicenseGate::LicenseString do
     it 'returns the string as reported' do
       expect(described_class.new('(MIT OR Apache-2.0)').to_s).to eq('(MIT OR Apache-2.0)')
     end
+
+    it 'returns Unknown however a package manager spells it' do
+      expect(described_class.new('UNKNOWN').to_s).to eq('Unknown')
+    end
   end
 
 end

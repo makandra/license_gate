@@ -12,6 +12,8 @@ RSpec.shared_context 'with a real package manager' do |executable, major_version
     Pathname(Dir.mktmpdir("license_gate_#{executable}", tmp))
   end
   let(:command) { [RbConfig.ruby, '-I', File.expand_path('../../lib', __dir__), File.expand_path('../../exe/license_gate', __dir__)] }
+  # Further environment variables for every command, e.g. package manager settings.
+  let(:env) { {} }
   let(:major_version) do
     output, status = run(executable, '--version')
     Gem::Version.new(output.strip).segments.first if status.success?
@@ -51,7 +53,7 @@ RSpec.shared_context 'with a real package manager' do |executable, major_version
   # Without a UTF-8 locale, as package managers report non-ASCII package authors.
   def run(*arguments)
     output, status = Bundler.with_unbundled_env do
-      Open3.capture2e({ 'PATH' => REAL_PATH, 'LC_ALL' => 'C' }, *arguments, chdir: project.to_s)
+      Open3.capture2e({ 'PATH' => REAL_PATH, 'LC_ALL' => 'C', **env }, *arguments, chdir: project.to_s)
     end
     [output.force_encoding(Encoding::UTF_8), status]
   end
