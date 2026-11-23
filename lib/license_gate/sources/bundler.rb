@@ -11,14 +11,30 @@ module LicenseGate
       end
 
       def packages
-        definition = ::Bundler::Definition.build(@gemfile, @lockfile, nil)
-        groups = definition.groups - @ignored_groups
-        # `specs_for` returns gems of all groups when given no groups.
-        specs = groups.any? ? definition.specs_for(groups) : []
         specs.map do |spec|
           # A gemspec setting `license = nil` reports `[nil]`.
           licenses = spec.licenses.compact
-          Package.new(ecosystem: Ecosystem::GEM, name: spec.name, version: spec.version.to_s, licenses:)
+
+          Package.new(
+            ecosystem: Ecosystem::GEM,
+            name: spec.name,
+            version: spec.version.to_s,
+            licenses:,
+          )
+        end
+      end
+
+      private
+
+      def specs
+        definition = ::Bundler::Definition.build(@gemfile, @lockfile, nil)
+        groups = definition.groups - @ignored_groups
+
+        # When given no groups, `specs_for` returns gems of all groups.
+        if groups.any?
+          definition.specs_for(groups)
+        else
+          []
         end
       end
 
