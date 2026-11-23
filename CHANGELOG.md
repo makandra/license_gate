@@ -1,4 +1,4 @@
-## Unreleased
+## [0.2.0] - 2026-11-23
 
 - Checks the licenses of npm packages installed through Yarn Classic (1) and Yarn 4; Yarn 4 needs the plugin yarn-plugin-licenses.
 - Fails when a project has lockfiles of several package managers, e.g. a `pnpm-lock.yaml` and a `yarn.lock`.
